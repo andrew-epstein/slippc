@@ -10,7 +10,7 @@ Analyzer::~Analyzer() {
   //Nothing to do yet
 }
 
-bool Analyzer::get1v1Ports(const SlippiReplay &s, Analysis *a) const {
+auto Analyzer::get1v1Ports(const SlippiReplay &s, Analysis *a) const -> bool {
   unsigned num_players = 0;
   for(uint8_t i = 0 ; i < 4; ++i) {
     if (s.player[i].player_type != 3) {
@@ -36,7 +36,7 @@ void Analyzer::computeAirtime(const SlippiReplay &s, Analysis *a) const {
       SlippiPlayer p = s.player[a->ap[pi].port];
       unsigned airframes = 0;
       for (unsigned f = (-LOAD_FRAME); f < s.frame_count; ++f) {
-        airframes += p.frame[f].airborne;
+        airframes += static_cast<unsigned int>(p.frame[f].airborne);
       }
 
       a->ap[pi].air_frames = airframes;
@@ -125,7 +125,7 @@ void Analyzer::countLCancels(const SlippiReplay &s, Analysis *a) const {
 
     a->ap[pi].l_cancels_hit    = cancels_hit;
     a->ap[pi].l_cancels_missed = cancels_miss;
-    float cancels_pct = 100*((float)cancels_hit / (cancels_hit+cancels_miss));
+    float cancels_pct = 100*(static_cast<float>(cancels_hit) / (cancels_hit+cancels_miss));
     // std::cout << "  Hit " << cancels_hit << "/" << cancels_hit+cancels_miss << " l cancels (" << cancels_pct << "%)" << std::endl;
   }
 }
@@ -219,9 +219,9 @@ void Analyzer::countAirdodgesAndWavelands(const SlippiReplay &s, Analysis *a) co
         if (foundAirdodge) {
           if ((not foundJumpsquat) && (not foundOther)) {
             continue; //If the airdodge is the only animation we found, proceed
-          } else {
+          } 
             --airdodges;  //Otherwise, subtract it from our airdodge count and keep checkings
-          }
+          
         }
         if (foundJumpsquat) {  //If we were in jumpsquat at all recently, we're wavedashing
           ++wavedashes;
@@ -657,7 +657,7 @@ void Analyzer::analyzePunishes(const SlippiReplay &s, Analysis *a) const {
   // }
 }
 
-unsigned Analyzer::countTransitions(const SlippiReplay &s, Analysis *a, unsigned pnum, bool (*cb)(const SlippiFrame&)) const {
+auto Analyzer::countTransitions(const SlippiReplay &s, Analysis *a, unsigned pnum, bool (*cb)(const SlippiFrame&)) const -> unsigned {
   SlippiPlayer p = s.player[a->ap[pnum].port];
   unsigned counter = 0;
   bool active = false;
@@ -674,7 +674,7 @@ unsigned Analyzer::countTransitions(const SlippiReplay &s, Analysis *a, unsigned
   return counter;
 }
 
-unsigned Analyzer::countTransitions(const SlippiReplay &s, Analysis *a, unsigned pnum, bool (*cb)(const SlippiPlayer &, const unsigned)) const {
+auto Analyzer::countTransitions(const SlippiReplay &s, Analysis *a, unsigned pnum, bool (*cb)(const SlippiPlayer &, const unsigned)) const -> unsigned {
   SlippiPlayer p = s.player[a->ap[pnum].port];
   unsigned counter = 0;
   bool active = false;
@@ -744,10 +744,10 @@ void Analyzer::countPhantoms(const SlippiReplay &s, Analysis *a) const {
   }
 }
 
-Analysis* Analyzer::analyze(const SlippiReplay &s) {
+auto Analyzer::analyze(const SlippiReplay &s) -> Analysis* {
   (*_dout) << "Analyzing replay\n----------\n" << std::endl;
 
-  Analysis *a            = new Analysis();  //Structure for holding the analysis so far
+  auto *a            = new Analysis();  //Structure for holding the analysis so far
   a->dynamics            = new unsigned[s.frame_count]{0}; // List of dynamics active at each frame
 
   //Verify this is a 1 v 1 match; can't analyze otherwise
@@ -781,4 +781,4 @@ Analysis* Analyzer::analyze(const SlippiReplay &s) {
   return a;
 }
 
-}
+} // namespace slip

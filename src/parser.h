@@ -33,9 +33,9 @@ private:
 
   char*           _rb = nullptr; //Read buffer
   unsigned        _bp; //Current position in buffer
-  uint32_t        _length_raw; //Remaining length of raw payload
-  uint32_t        _length_raw_start; //Total length of raw payload
-  uint32_t        _file_size; //Total size of the replay file on disk
+  uint32_t        _length_raw{}; //Remaining length of raw payload
+  uint32_t        _length_raw_start{}; //Total length of raw payload
+  uint32_t        _file_size{}; //Total size of the replay file on disk
   bool            _parse(); //Internal main parsing funnction
   bool            _parseHeader();
   bool            _parseEventDescriptions();

@@ -1,19 +1,19 @@
 #include <algorithm>
 
-#include "util.h"
-#include "parser.h"
 #include "analyzer.h"
+#include "parser.h"
+#include "util.h"
 
 // https://stackoverflow.com/questions/865668/how-to-parse-command-line-arguments-in-c
-char* getCmdOption(char ** begin, char ** end, const std::string & option) {
+auto getCmdOption(char ** begin, char ** end, const std::string & option) -> char* {
   char ** itr = std::find(begin, end, option);
   if (itr != end && ++itr != end) {
     return *itr;
   }
-  return 0;
+  return nullptr;
 }
 
-bool cmdOptionExists(char** begin, char** end, const std::string& option) {
+auto cmdOptionExists(char** begin, char** end, const std::string& option) -> bool {
   return std::find(begin, end, option) != end;
 }
 
@@ -30,7 +30,7 @@ void printUsage() {
     ;
 }
 
-int main(int argc, char** argv) {
+auto main(int argc, char** argv) -> int {
   if (cmdOptionExists(argv, argv+argc, "-h")) {
     printUsage();
     return 0;
@@ -42,25 +42,25 @@ int main(int argc, char** argv) {
     debug = 1;
   }
   char * infile = getCmdOption(argv, argv + argc, "-i");
-  if (not infile) {
+  if (infile == nullptr) {
     printUsage();
     return -1;
   }
   bool delta = not cmdOptionExists(argv, argv+argc, "-f");
 
-  slip::Parser *p = new slip::Parser(debug);
+  auto *p = new slip::Parser(debug);
   if (not p->load(infile)) {
     delete p;
     return 2;
   }
 
   char * outfile = getCmdOption(argv, argv + argc, "-j");
-  if (outfile) {
+  if (outfile != nullptr) {
     p->save(outfile,delta);
   }
 
   char * analysisfile = getCmdOption(argv, argv + argc, "-a");
-  if (analysisfile) {
+  if (analysisfile != nullptr) {
     slip::Analysis *a = p->analyze();
     if (analysisfile[0] == '-' and analysisfile[1] == '\0') {
       std::cout << a->asJson() << std::endl;

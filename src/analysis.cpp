@@ -5,11 +5,11 @@
 #define JINT(i,k,n) SPACE[ILEV*(i)] << "\"" << (k) << "\" : " << int32_t(n)
 #define JUIN(i,k,n) SPACE[ILEV*(i)] << "\"" << (k) << "\" : " << uint32_t(n)
 #define JSTR(i,k,s) SPACE[ILEV*(i)] << "\"" << (k) << "\" : \"" << (s) << "\""
-#define JEND(a) ((a++ == 0) ? "\n" : ",\n")
+#define JEND(a) (((a)++ == 0) ? "\n" : ",\n")
 
 namespace slip {
 
-std::string Analysis::asJson() {
+auto Analysis::asJson() -> std::string {
   std::stringstream ss;
   ss << "{" << std::endl;
 
@@ -114,4 +114,4 @@ void Analysis::save(const char* outfilename) {
   fout.close();
 }
 
-}
+} // namespace slip

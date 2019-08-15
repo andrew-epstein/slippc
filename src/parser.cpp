@@ -23,7 +23,7 @@ namespace slip {
   }
 
   Parser::~Parser() {
-    if(not _debug) {
+    if(_debug == 0) {
       _dnull->close();
       delete _dnull;
     }
@@ -34,7 +34,7 @@ namespace slip {
     _cleanup();
   }
 
-  bool Parser::load(const char* replayfilename) {
+  auto Parser::load(const char* replayfilename) -> bool {
     DOUT1("Loading " << replayfilename << std::endl);
     std::ifstream myfile;
     myfile.open(replayfilename,std::ios::binary | std::ios::in);
@@ -58,7 +58,7 @@ namespace slip {
     return this->_parse();
   }
 
-  bool Parser::_parse() {
+  auto Parser::_parse() -> bool {
     if (not this->_parseHeader()) {
       std::cerr << "Failed to parse header" << std::endl;
       return false;
@@ -79,7 +79,7 @@ namespace slip {
     return true;
   }
 
-  bool Parser::_parseHeader() {
+  auto Parser::_parseHeader() -> bool {
     DOUT1("Parsing header" << std::endl);
     _bp = 0; //Start reading from byte 0
 
@@ -105,7 +105,7 @@ namespace slip {
     return true;
   }
 
-  bool Parser::_parseEventDescriptions() {
+  auto Parser::_parseEventDescriptions() -> bool {
     DOUT1("Parsing event descriptions" << std::endl);
 
     //Next 2 bytes should be 0x35
@@ -150,7 +150,7 @@ namespace slip {
     return true;
   }
 
-  bool Parser::_parseEvents() {
+  auto Parser::_parseEvents() -> bool {
     DOUT1("Parsing events proper" << std::endl);
 
     bool success = true;
@@ -185,7 +185,7 @@ namespace slip {
     return true;
   }
 
-  bool Parser::_parseGameStart() {
+  auto Parser::_parseGameStart() -> bool {
     DOUT1("  Parsing game start event at byte " << +_bp << std::endl);
 
     if (_slippi_maj > 0) {
@@ -262,7 +262,7 @@ namespace slip {
     return true;
   }
 
-  bool Parser::_parsePreFrame() {
+  auto Parser::_parsePreFrame() -> bool {
     DOUT2("  Parsing pre frame event at byte " << +_bp << std::endl);
     int32_t fnum = readBE4S(&_rb[_bp+0x1]);
     int32_t f    = fnum-LOAD_FRAME;
@@ -288,7 +288,7 @@ namespace slip {
     _replay.player[p].frame[f].frame        = fnum;
     _replay.player[p].frame[f].player       = p%4;
     _replay.player[p].frame[f].follower     = (p>3);
-    _replay.player[p].frame[f].alive        = 1;
+    _replay.player[p].frame[f].alive        = true;
     _replay.player[p].frame[f].seed         = readBE4U(&_rb[_bp+0x7]);
     _replay.player[p].frame[f].action_pre   = readBE2U(&_rb[_bp+0xB]);
     _replay.player[p].frame[f].pos_x_pre    = readBE4F(&_rb[_bp+0xD]);
@@ -313,7 +313,7 @@ namespace slip {
     return true;
   }
 
-  bool Parser::_parsePostFrame() {
+  auto Parser::_parsePostFrame() -> bool {
     DOUT2("  Parsing post frame event at byte " << +_bp << std::endl);
     int32_t fnum = readBE4S(&_rb[_bp+0x1]);
     int32_t f    = fnum-LOAD_FRAME;
@@ -367,7 +367,7 @@ namespace slip {
     return true;
   }
 
-  bool Parser::_parseGameEnd() {
+  auto Parser::_parseGameEnd() -> bool {
     DOUT1("  Parsing game end event at byte " << +_bp << std::endl);
     _replay.end_type       = uint8_t(_rb[_bp+0x1]);
 
@@ -377,7 +377,7 @@ namespace slip {
     return true;
   }
 
-  bool Parser::_parseMetadata() {
+  auto Parser::_parseMetadata() -> bool {
     DOUT1("Parsing metadata" << std::endl);
 
     //Parse metadata from UBJSON as regular JSON
@@ -418,7 +418,7 @@ namespace slip {
           i = i+2+strlen;
           break;
         case 0x7d: //} -> Object ending
-          keypath = keypath.substr(0,keypath.find_last_of(","));
+          keypath = keypath.substr(0,keypath.find_last_of(','));
           indent = indent.substr(1);
           if (indent.length() == 0) {
             done = true;
@@ -474,7 +474,7 @@ namespace slip {
             }
           }
           i = i+3+strlen;
-          keypath = keypath.substr(0,keypath.find_last_of(","));
+          keypath = keypath.substr(0,keypath.find_last_of(','));
           break;
         case 0x6c: //l -> 32-bit signed int upcoming
           if (_bp+i+4 >= _file_size) {
@@ -483,7 +483,7 @@ namespace slip {
           n = readBE4S(&_rb[_bp+i+1]);
           ss << std::dec << n << "," << std::endl;
           i = i+5;
-          keypath = keypath.substr(0,keypath.find_last_of(","));
+          keypath = keypath.substr(0,keypath.find_last_of(','));
           break;
         default:
           std::cerr << "Warning: don't know what's happening; expected value" << std::endl;
@@ -512,7 +512,7 @@ namespace slip {
     return true;
   }
 
-  Analysis* Parser::analyze() {
+  auto Parser::analyze() -> Analysis* {
     Analyzer a(_dout);
     return a.analyze(_replay);
   }
@@ -531,4 +531,4 @@ namespace slip {
   }
 
 
-}
+} // namespace slip
